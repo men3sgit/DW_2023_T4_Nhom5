@@ -1,6 +1,0 @@
-java.io.FileNotFoundException: https://portal.vietcombank.com.vn/Usercontros/TVPortal.TyGia/pXML.aspx
-	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1989)
-	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1585)
-	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224)
-	at com.menes.scripts.JSoupVietcombank.fetchXmlData(JSoupVietcombank.java:63)
-	at com.menes.scripts.JSoupVietcombank.main(JSoupVietcombank.java:22)
