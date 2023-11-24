@@ -3,6 +3,11 @@ package com.menes.scripts;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -22,13 +27,23 @@ public class Configuration {
             properties.load(input);
         }
     }
+    public String getAuthorName(){
+        return properties.getProperty("author.name");
+    }
+
     public String getScrapeStartDate() {
-        return properties.getProperty("scrape.start.date");
+        return properties.getProperty("scrape.start-date");
+    }
+    public String getErrorFileName(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_hhmmss_a");
+        String timestamp = dateFormat.format(new Date());
+        return properties.getProperty("error.file.name").replace("{timestamp}", timestamp);
     }
 
     public String getScrapeEndDate() {
-        return properties.getProperty("scrape.end.date");
+        return properties.getProperty("scrape.end-date");
     }
+
     public String getChromeDriverPath() {
         return properties.getProperty("webdriver.chrome.driver");
     }
@@ -42,11 +57,14 @@ public class Configuration {
         String timestamp = dateFormat.format(new Date());
         return properties.getProperty("csv.file.name").replace("{timestamp}", timestamp);
     }
-    public static String previousDay(String date) throws ParseException {
+
+    public static String nextDay(String date) throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(format.parse(date));
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(Calendar.DATE, 1);
         return format.format(calendar.getTime());
     }
+
+
 }

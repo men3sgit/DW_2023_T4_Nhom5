@@ -7,11 +7,16 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.menes.scripts.Configuration.previousDay;
+import static com.menes.scripts.Configuration.nextDay;
 
 public class VietcombankSelenium {
 
@@ -28,6 +33,8 @@ public class VietcombankSelenium {
 
         try {
             performScraping(driver, configuration);
+        } catch (Exception e) {
+            ExceptionMailer.handleException(e);
         } finally {
             // Close resources
             driver.quit();
@@ -45,20 +52,20 @@ public class VietcombankSelenium {
      */
     private static void performScraping(WebDriver driver, Configuration configuration)
             throws InterruptedException, ParseException, IOException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss a");
         // Open CSV file for writing
         String csvFileName = configuration.getCsvFileNameWithTimestamp();
-        File csvFile = new File(csvFileName);
 
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile))) {
+        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFileName))) {
             // Write header to CSV file
-            csvWriter.writeNext(new String[]{"Code", "Name", "Cash Buying", "Telegraphic Buying", "Selling", "Time", "Date", "Source"});
+            csvWriter.writeNext(new String[]{"Code", "Name", "Cash Buying", "Telegraphic Buying", "Selling", "Time", "Date", "Source", "Crawled By", "Crawled at"});
             Thread.sleep(3000);
             WebElement datePicker = driver.findElement(By.id("datePicker"));
 
             // Replace the hard-coded date with a variable
             String currentDate = configuration.getScrapeStartDate();
 
-            while (!currentDate.equals(configuration.getScrapeEndDate())) {
+            while (Integer.parseInt(currentDate) <= Integer.parseInt(configuration.getScrapeEndDate())) {
                 datePicker.clear();
                 datePicker.sendKeys(currentDate);
                 Thread.sleep(3000);
@@ -72,26 +79,32 @@ public class VietcombankSelenium {
                 String time = dateTimeArray[1];
                 String dateTime = dateTimeArray[3];
 
-                for (WebElement row : rows) {
-                    List<WebElement> columns = row.findElements(By.tagName("td"));
-                    String code = columns.get(0).getText();
-                    String name = columns.get(1).getText();
-                    String cashBuying = columns.get(2).getText();
-                    String telegraphicBuying = columns.get(3).getText();
-                    String selling = columns.get(4).getText();
+                rows.forEach(row -> {
+                    List<String> columns = row.findElements(By.tagName("td"))
+                            .stream()
+                            .map(WebElement::getText)
+                            .toList();
+
+                    // Extract values from columns
+                    String code = columns.get(0);
+                    String name = columns.get(1);
+                    String cashBuying = columns.get(2);
+                    String telegraphicBuying = columns.get(3);
+                    String selling = columns.get(4);
 
                     // Print to console
-                    System.out.println(String.format("%s %s %s %s %s %s %s", code, name, cashBuying, telegraphicBuying, selling, dateTime, "Vietcombank"));
+                    System.out.println(String.format("%s %s %s %s %s %s %s %s %s",
+                            code, name, cashBuying, telegraphicBuying, selling, dateTime, "Vietcombank", configuration.getAuthorName(), formatter.format(LocalDateTime.now())));
 
                     // Write to CSV file
-                    csvWriter.writeNext(new String[]{code, name, cashBuying, telegraphicBuying, selling, time, dateTime, "Vietcombank"});
-                }
+                    csvWriter.writeNext(new String[]{code, name, cashBuying, telegraphicBuying, selling, time, dateTime, "Vietcombank", configuration.getAuthorName(), formatter.format(LocalDateTime.now())});
+                });
 
-                // Move to the previous day
-                currentDate = previousDay(currentDate);
+                // Move to the next day
+                currentDate = nextDay(currentDate);
             }
+            // Close CSV writer
         }
-        // Close CSV writer
     }
 
     /**

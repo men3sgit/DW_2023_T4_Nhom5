@@ -1,12 +1,13 @@
 package com.menes.scripts;
 
 import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 
 public class ExceptionMailer {
@@ -17,11 +18,8 @@ public class ExceptionMailer {
 
     public static void handleException(Exception e) {
         try {
-            // Create a timestamp for the error file
-            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-
             // Create an error file and write the exception details to it
-            String errorFileName = "error_" + timestamp + ".txt";
+            String errorFileName = new Configuration().getErrorFileName();
             PrintWriter writer = new PrintWriter(new FileWriter(errorFileName));
             e.printStackTrace(writer);
             writer.close();
