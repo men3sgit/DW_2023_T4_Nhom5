@@ -47,10 +47,8 @@ public class JSoupVietcombank {
             // Extract source
             String source = doc.select("Source").text();
             System.out.println("Source: " + source);
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException(ex);
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            ExceptionMailer.handleException(ex);
         }
     }
 
@@ -62,9 +60,7 @@ public class JSoupVietcombank {
         connection.setRequestMethod("GET");
 
         // Get input stream from the connection
-        try (InputStream inputStream = connection.getInputStream();
-             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+        try (InputStream inputStream = connection.getInputStream(); InputStreamReader inputStreamReader = new InputStreamReader(inputStream); BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             StringBuilder response = new StringBuilder();
             String line;
@@ -75,9 +71,13 @@ public class JSoupVietcombank {
             }
 
             return response.toString();
+        } catch (Exception e) {
+            ExceptionMailer.handleException(e);
+
         } finally {
             // Disconnect the connection
             connection.disconnect();
         }
+        return xmlUrl;
     }
 }

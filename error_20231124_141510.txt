@@ -1,0 +1,3 @@
+java.lang.Exception: An example exception occurred
+	at com.menes.scripts.ExceptionMailer.throwException(ExceptionMailer.java:30)
+	at com.menes.scripts.ExceptionMailer.main(ExceptionMailer.java:21)

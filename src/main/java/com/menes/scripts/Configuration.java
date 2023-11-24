@@ -38,7 +38,7 @@ public class Configuration {
     }
 
     public String getCsvFileNameWithTimestamp() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy_hh-mm-ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_hhmmss_a");
         String timestamp = dateFormat.format(new Date());
         return properties.getProperty("csv.file.name").replace("{timestamp}", timestamp);
     }

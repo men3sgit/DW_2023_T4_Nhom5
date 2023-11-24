@@ -13,17 +13,16 @@ import java.util.*;
 
 import static com.menes.scripts.Configuration.previousDay;
 
-public class VietcombankScraper {
+public class VietcombankSelenium {
 
     /**
-     * Main method to execute the Vietcombank scraping process.
+     * run method to execute the Vietcombank scraping process.
      *
-     * @param args Command line arguments (not used).
      * @throws InterruptedException If the thread is interrupted during sleep.
      * @throws ParseException       If there is an error parsing a date.
      * @throws IOException          If an I/O error occurs.
      */
-    public static void main(String[] args) throws InterruptedException, ParseException, IOException {
+    public static void run() throws IOException, ParseException, InterruptedException {
         Configuration configuration = new Configuration();
         WebDriver driver = initializeDriver(configuration);
 
