@@ -14,13 +14,31 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+        <!-- JDBI with PostgreSQL driver -->
+        <!-- Other dependencies -->
+
+        <!-- JDBI with SqlObjectPlugin and PostgreSQL driver -->
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-core</artifactId>
+            <version>3.37.0</version> <!-- Update to the latest version -->
+        </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-sqlobject</artifactId>
+            <version>3.37.0</version> <!-- Update to the latest version -->
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.24</version> <!-- Replace with the latest version -->
+        </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>1.6.2</version> <!-- Use the latest version available -->
         </dependency>
 
-        <!-- JavaBeans Activation Framework (JAF) -->
         <!-- JavaBeans Activation Framework (JAF) -->
         <dependency>
             <groupId>javax.activation</groupId>
@@ -30,18 +48,19 @@
                 <dependency>
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
-                    <version>1.14.3</version> <!-- Check for the latest version on the JSoup website -->
+                    <version>1.15.4</version> <!-- Check for the latest version on the JSoup website -->
                 </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.141.59</version> <!-- Use the latest version available -->
+            <version>4.8.2</version> <!-- Use the latest version available -->
         </dependency>
+
             <!-- opencsv -->
             <dependency>
                 <groupId>com.opencsv</groupId>
                 <artifactId>opencsv</artifactId>
-                <version>5.5</version> <!-- You can check for the latest version on the Maven Central Repository -->
+                <version>5.7.1</version> <!-- You can check for the latest version on the Maven Central Repository -->
             </dependency>
     </dependencies>
 

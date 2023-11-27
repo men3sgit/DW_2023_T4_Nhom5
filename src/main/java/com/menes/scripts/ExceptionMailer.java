@@ -19,7 +19,7 @@ public class ExceptionMailer {
     public static void handleException(Exception e) {
         try {
             // Create an error file and write the exception details to it
-            String errorFileName = new Configuration().getErrorFileName();
+            String errorFileName = Configuration.getInstance().getErrorFileName();
             PrintWriter writer = new PrintWriter(new FileWriter(errorFileName));
             e.printStackTrace(writer);
             writer.close();

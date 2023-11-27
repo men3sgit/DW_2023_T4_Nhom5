@@ -1,20 +1,22 @@
 package com.menes.scripts;
 
+import com.menes.scripts.db.CsvLineReader;
 import com.opencsv.CSVWriter;
+import com.opencsv.CSVWriterBuilder;
+import com.opencsv.ICSVWriter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.menes.scripts.Configuration.nextDay;
 
@@ -28,11 +30,12 @@ public class VietcombankSelenium {
      * @throws IOException          If an I/O error occurs.
      */
     public static void run() throws IOException, ParseException, InterruptedException {
-        Configuration configuration = new Configuration();
+        Configuration configuration = Configuration.getInstance();
         WebDriver driver = initializeDriver(configuration);
 
         try {
             performScraping(driver, configuration);
+
         } catch (Exception e) {
             ExceptionMailer.handleException(e);
         } finally {
@@ -50,15 +53,21 @@ public class VietcombankSelenium {
      * @throws ParseException       If there is an error parsing a date.
      * @throws IOException          If an I/O error occurs.
      */
-    private static void performScraping(WebDriver driver, Configuration configuration)
-            throws InterruptedException, ParseException, IOException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss a");
-        // Open CSV file for writing
-        String csvFileName = configuration.getCsvFileNameWithTimestamp();
+    private static void performScraping(WebDriver driver, Configuration configuration) throws InterruptedException, ParseException, IOException {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
 
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFileName))) {
+        // Open CSV file for writing
+//        String csvFileName = configuration.getCsvFileNameWithTimestamp();
+        String csvFileName = Configuration.getInstance().getCsvFileNameWithTimestamp();
+// Specify your custom delimiter (e.g., a tab character '\t')
+        char customDelimiter = '\t';
+        try (CSVWriter csvWriter = (CSVWriter) new CSVWriterBuilder(new FileWriter(csvFileName))
+                .withSeparator(customDelimiter)
+                .withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER)
+                .build()) {
             // Write header to CSV file
-            csvWriter.writeNext(new String[]{"Code", "Name", "Cash Buying", "Telegraphic Buying", "Selling", "Time", "Date", "Source", "Crawled By", "Crawled at"});
+            csvWriter.writeNext(new String[]{"Code", "Name", "Cash Buying", "Telegraphic Buying", "Selling", "Time", "Date", "Source", "Crawled Date", "Crawled Time"});
             Thread.sleep(3000);
             WebElement datePicker = driver.findElement(By.id("datePicker"));
 
@@ -77,13 +86,10 @@ public class VietcombankSelenium {
                 List<WebElement> rows = driver.findElements(By.cssSelector("table.table-responsive > tbody tr"));
                 String[] dateTimeArray = driver.findElement(By.cssSelector(".annotate__content strong")).getText().split("\\s+");
                 String time = dateTimeArray[1];
-                String dateTime = dateTimeArray[3];
+                String date = dateTimeArray[3];
 
                 rows.forEach(row -> {
-                    List<String> columns = row.findElements(By.tagName("td"))
-                            .stream()
-                            .map(WebElement::getText)
-                            .toList();
+                    List<String> columns = row.findElements(By.tagName("td")).stream().map(WebElement::getText).toList();
 
                     // Extract values from columns
                     String code = columns.get(0);
@@ -93,11 +99,10 @@ public class VietcombankSelenium {
                     String selling = columns.get(4);
 
                     // Print to console
-                    System.out.println(String.format("%s %s %s %s %s %s %s %s %s",
-                            code, name, cashBuying, telegraphicBuying, selling, dateTime, "Vietcombank", configuration.getAuthorName(), formatter.format(LocalDateTime.now())));
+                    System.out.println(String.format("%s %s %s %s %s %s %s %s %s", code, name, cashBuying, telegraphicBuying, selling, time, "Vietcombank", date, timeFormatter.format(LocalDateTime.now())));
 
                     // Write to CSV file
-                    csvWriter.writeNext(new String[]{code, name, cashBuying, telegraphicBuying, selling, time, dateTime, "Vietcombank", configuration.getAuthorName(), formatter.format(LocalDateTime.now())});
+                    csvWriter.writeNext(new String[]{code, name, cashBuying, telegraphicBuying, selling, time, date, "Vietcombank", dateFormatter.format(LocalDateTime.now()), timeFormatter.format(LocalDateTime.now())});
                 });
 
                 // Move to the next day
