@@ -3,11 +3,6 @@ package com.menes.scripts;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,8 +12,16 @@ import java.util.Properties;
 public class Configuration {
     private static final String CONFIG_FILE = "config.properties";
     private final Properties properties;
+    private static Configuration configuration;
 
-    public Configuration() throws IOException {
+    public static Configuration getInstance() throws IOException {
+        if (configuration == null) {
+            return configuration = new Configuration();
+        }
+        return configuration;
+    }
+
+    private Configuration() throws IOException {
         properties = new Properties();
         try (InputStream input = Configuration.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
             if (input == null) {
@@ -27,14 +30,16 @@ public class Configuration {
             properties.load(input);
         }
     }
-    public String getAuthorName(){
+
+    public String getAuthorName() {
         return properties.getProperty("author.name");
     }
 
     public String getScrapeStartDate() {
         return properties.getProperty("scrape.start-date");
     }
-    public String getErrorFileName(){
+
+    public String getErrorFileName() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_hhmmss_a");
         String timestamp = dateFormat.format(new Date());
         return properties.getProperty("error.file.name").replace("{timestamp}", timestamp);
@@ -64,6 +69,31 @@ public class Configuration {
         calendar.setTime(format.parse(date));
         calendar.add(Calendar.DATE, 1);
         return format.format(calendar.getTime());
+    }
+
+    public String getDBHost() {
+
+        return properties.getProperty("db.host");
+    }
+
+    public String getDBPassword() {
+
+        return properties.getProperty("db.password");
+    }
+
+    public String getDBUsername() {
+
+        return properties.getProperty("db.username");
+    }
+
+    public String getDBPort() {
+
+        return properties.getProperty("db.port");
+    }
+
+    public String getDBName() {
+
+        return properties.getProperty("db.name");
     }
 
 

@@ -1,5 +1,7 @@
 package com.menes.scripts;
 
+import com.menes.scripts.db.CsvLineReader;
+
 import java.io.IOException;
 import java.text.ParseException;
 
