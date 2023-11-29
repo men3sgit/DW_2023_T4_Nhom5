@@ -1,0 +1,5 @@
+package com.menes.utils;
+
+public enum Status {
+    OFF, CRAWLING, CRAWLED, TRANSFORMING, TRANSFORMED, LOADING, LOADED, FINISHED, RUNNING, ERROR
+}

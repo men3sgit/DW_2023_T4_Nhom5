@@ -1,4 +1,4 @@
-package com.menes.scripts.db;
+package com.menes.db;
 
 public class CurrencyExchange {
     private String code;

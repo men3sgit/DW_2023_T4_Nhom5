@@ -1,4 +1,4 @@
-package com.menes.scripts;
+package com.menes.utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

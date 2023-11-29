@@ -1,4 +1,4 @@
-package com.menes.scripts;
+package com.menes.utils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;  // Fix the import statement

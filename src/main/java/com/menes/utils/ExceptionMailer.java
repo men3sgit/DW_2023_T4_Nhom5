@@ -1,4 +1,4 @@
-package com.menes.scripts;
+package com.menes.utils;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -27,7 +27,7 @@ public class ExceptionMailer {
             // Send the error file via email
             sendEmailWithAttachment(errorFileName);
 
-            System.out.println("Error file sent successfully.");
+            System.err.println("Error file sent successfully.");
         } catch (Exception ex) {
             // Handle any exceptions that might occur during the handling process
             ex.printStackTrace();
