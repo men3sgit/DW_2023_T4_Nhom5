@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/dw_nhom5</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="dw_config@localhost" uuid="cf33bda1-d7a8-4747-92ae-29f1023dc471">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/dw_config</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

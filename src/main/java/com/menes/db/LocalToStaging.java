@@ -1,6 +1,6 @@
-package com.menes.scripts.db;
+package com.menes.db;
 
-import com.menes.scripts.Configuration;
+import com.menes.utils.Configuration;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -16,12 +16,7 @@ import java.util.Comparator;
 /**
  * CsvLineReader class reads data from a CSV file and inserts it into a PostgreSQL database using JDBI.
  */
-public class CsvLineReader {
-
-    /**
-     * Path to the latest CSV file.
-     */
-    public static final String FILE_CSV;
+public class LocalToStaging {
 
     /**
      * Configuration instance.
@@ -30,10 +25,9 @@ public class CsvLineReader {
 
     static {
         try {
+            Thread.sleep(4000);
             CONFIGURATION = Configuration.getInstance();
-            FILE_CSV = getExtractFile();
-            System.out.println(FILE_CSV);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
@@ -43,8 +37,8 @@ public class CsvLineReader {
      *
      * @return The absolute path to the latest CSV file.
      */
-    private static String getExtractFile() {
-        File directory = new File("D:\\dw\\extracted");
+    private static String getExtractFile(String extractFilePath) {
+        File directory = new File(extractFilePath);
         File[] files = directory.listFiles();
 
         if (files != null && files.length > 0) {
@@ -58,15 +52,14 @@ public class CsvLineReader {
     /**
      * Runs the process of reading data from the CSV file and inserting it into the PostgreSQL database.
      */
-    public static void run() {
-        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s",
-                CONFIGURATION.getDBHost(), CONFIGURATION.getDBPort(), CONFIGURATION.getDBName());
+    public static void run(String extractFilePath) {
+        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", CONFIGURATION.getDBHost(), CONFIGURATION.getDBPort(), CONFIGURATION.getDBName());
         String username = CONFIGURATION.getDBUsername();
         String password = CONFIGURATION.getDBPassword();
 
         Jdbi jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_CSV))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(getExtractFile(extractFilePath)))) {
             // Skip the header row
             reader.readLine();
 
@@ -84,8 +77,7 @@ public class CsvLineReader {
                     }
 
                     // Map CSV data to a Java bean (assuming CurrencyExchange is a class representing your table)
-                    CurrencyExchange currencyExchange = new CurrencyExchange(
-                            data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]);
+                    CurrencyExchange currencyExchange = new CurrencyExchange(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]);
                     System.out.println(currencyExchange);
 
                     // Insert the data into the PostgreSQL table using JDBI
@@ -93,7 +85,7 @@ public class CsvLineReader {
                 }
             });
 
-            System.out.println("Data loaded successfully.");
+            System.err.println("Data loaded successfully.");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,8 +102,7 @@ public class CsvLineReader {
          *
          * @param currencyExchange The CurrencyExchange object to insert.
          */
-        @SqlUpdate("INSERT INTO currency_exchange (code, name, cash_buying, telegraphic_buying, selling, time, date, bank_name, crawled_date, crawled_time) " +
-                "VALUES (:code, :name, :cashBuying, :telegraphicBuying, :selling, :time, :date, :bankName, :crawledDate, :crawledTime)")
+        @SqlUpdate("INSERT INTO currency_exchange (code, name, cash_buying, telegraphic_buying, selling, time, date, bank_name, crawled_date, crawled_time) " + "VALUES (:code, :name, :cashBuying, :telegraphicBuying, :selling, :time, :date, :bankName, :crawledDate, :crawledTime)")
         void insert(@BindBean CurrencyExchange currencyExchange);
     }
 }

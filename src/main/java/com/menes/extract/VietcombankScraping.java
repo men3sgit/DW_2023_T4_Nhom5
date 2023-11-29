@@ -1,6 +1,7 @@
-package com.menes.scripts;
+package com.menes.extract;
 
-import com.menes.scripts.db.CsvLineReader;
+import com.menes.utils.Configuration;
+import com.menes.utils.ExceptionMailer;
 import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
@@ -9,7 +10,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.menes.scripts.Configuration.nextDay;
+import static com.menes.utils.Configuration.nextDay;
 
-public class VietcombankSelenium {
-
+public class VietcombankScraping {
+    static int count = 0;
     /**
      * run method to execute the Vietcombank scraping process.
      *
@@ -29,13 +29,16 @@ public class VietcombankSelenium {
      * @throws ParseException       If there is an error parsing a date.
      * @throws IOException          If an I/O error occurs.
      */
-    public static void run() throws IOException, ParseException, InterruptedException {
+    private static String csvPath;
+
+    public static void run(String resultPath) throws IOException, ParseException, InterruptedException {
         Configuration configuration = Configuration.getInstance();
+        csvPath = resultPath + configuration.getCsvFileNameWithTimestamp();
         WebDriver driver = initializeDriver(configuration);
 
         try {
             performScraping(driver, configuration);
-
+            System.err.println("Crawled " + count + " data rows");
         } catch (Exception e) {
             ExceptionMailer.handleException(e);
         } finally {
@@ -58,8 +61,7 @@ public class VietcombankSelenium {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
 
         // Open CSV file for writing
-//        String csvFileName = configuration.getCsvFileNameWithTimestamp();
-        String csvFileName = Configuration.getInstance().getCsvFileNameWithTimestamp();
+        String csvFileName = csvPath;
 // Specify your custom delimiter (e.g., a tab character '\t')
         char customDelimiter = '\t';
         try (CSVWriter csvWriter = (CSVWriter) new CSVWriterBuilder(new FileWriter(csvFileName))
@@ -103,6 +105,7 @@ public class VietcombankSelenium {
 
                     // Write to CSV file
                     csvWriter.writeNext(new String[]{code, name, cashBuying, telegraphicBuying, selling, time, date, "Vietcombank", dateFormatter.format(LocalDateTime.now()), timeFormatter.format(LocalDateTime.now())});
+                    count++;
                 });
 
                 // Move to the next day
