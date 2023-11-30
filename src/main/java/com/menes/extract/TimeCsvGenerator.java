@@ -32,7 +32,7 @@ public class TimeCsvGenerator {
     }
 
     private static void writeTimeRow(FileWriter writer, int hour, int minute, int second) throws IOException {
-        String timeRow = String.format(",%02d,%02d,%02d\n", hour, minute, second);
-        writer.write(count++ + timeRow);
+        String timeRow = String.format("%s,%02d,%02d,%02d\n", String.format("%02d:%02d:%02d", hour, minute, second), hour, minute, second);
+        writer.write(timeRow);
     }
 }

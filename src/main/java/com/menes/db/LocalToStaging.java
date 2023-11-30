@@ -6,10 +6,7 @@ import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -52,44 +49,42 @@ public class LocalToStaging {
     /**
      * Runs the process of reading data from the CSV file and inserting it into the PostgreSQL database.
      */
-    public static void run(String extractFilePath) {
+    public static void run(String extractFilePath) throws IOException {
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", CONFIGURATION.getDBHost(), CONFIGURATION.getDBPort(), CONFIGURATION.getDBName());
         String username = CONFIGURATION.getDBUsername();
         String password = CONFIGURATION.getDBPassword();
 
         Jdbi jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(getExtractFile(extractFilePath)))) {
-            // Skip the header row
-            reader.readLine();
+        BufferedReader reader = new BufferedReader(new FileReader(getExtractFile(extractFilePath)));
+        // Skip the header row
+        reader.readLine();
 
-            // Create a Jdbi handle
-            jdbi.useHandle(handle -> {
-                handle.createUpdate("TRUNCATE TABLE currency_exchange").execute();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Parse the CSV line
-                    String[] data = line.split("\\t");
+        // Create a Jdbi handle
+        jdbi.useHandle(handle -> {
+            handle.createUpdate("TRUNCATE TABLE currency_exchange").execute();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Parse the CSV line
+                String[] data = line.split("\\t");
 
-                    // Remove double quotes from each element in the data array
-                    for (int i = 0; i < data.length; i++) {
-                        data[i] = data[i].replaceAll("\"", "");
-                    }
-
-                    // Map CSV data to a Java bean (assuming CurrencyExchange is a class representing your table)
-                    CurrencyExchange currencyExchange = new CurrencyExchange(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]);
-                    System.out.println(currencyExchange);
-
-                    // Insert the data into the PostgreSQL table using JDBI
-                    handle.attach(CurrencyExchangeDao.class).insert(currencyExchange);
+                // Remove double quotes from each element in the data array
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = data[i].replaceAll("\"", "");
                 }
-            });
 
-            System.err.println("Data loaded successfully.");
+                // Map CSV data to a Java bean (assuming CurrencyExchange is a class representing your table)
+                CurrencyExchange currencyExchange = new CurrencyExchange(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]);
+                System.out.println(currencyExchange);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                // Insert the data into the PostgreSQL table using JDBI
+                handle.attach(CurrencyExchangeDao.class).insert(currencyExchange);
+            }
+        });
+
+        System.err.println("Data loaded successfully.");
+
+
     }
 
     /**
