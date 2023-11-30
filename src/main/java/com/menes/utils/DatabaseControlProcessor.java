@@ -112,10 +112,11 @@ public class DatabaseControlProcessor {
                 // Update the configuration status to indicate transformation completion.
                 updateConfigStatus(handle, id, Status.OFF, Status.TRANSFORMED);
 
-            } catch (IOException | ParseException | InterruptedException e) {
+            } catch (Exception e) {
                 // In case of an exception during processing, update the configuration status to indicate an error.
                 handle.createUpdate("UPDATE configs SET status = :status WHERE id = :id")
                         .bind("status", Status.ERROR.toString())
+                        .bind("is_running", Status.OFF.toString())
                         .bind("id", id)
                         .execute();
                 throw new RuntimeException(e);

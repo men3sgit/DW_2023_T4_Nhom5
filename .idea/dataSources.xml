@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="dw_nhom5@localhost" uuid="44ebb60c-ac5f-4c0a-8bf1-2b7595d143fc">
+    <data-source source="LOCAL" name="warehouse@localhost" uuid="a2ce7823-9291-4afe-b567-f0901d921ac1">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/dw_nhom5</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="dw_config@localhost" uuid="cf33bda1-d7a8-4747-92ae-29f1023dc471">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/dw_config</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/warehouse</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
