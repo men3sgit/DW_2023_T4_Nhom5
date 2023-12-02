@@ -1,0 +1,13 @@
+.container {
+    text-align: center; /* Center the content horizontally */
+  }
+  
+  .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px; /* Adjust the margin as needed */
+  }
+  .header h1 {
+    margin-right: 48px; /* Adjust the margin as needed */
+  }

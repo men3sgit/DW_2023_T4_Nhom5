@@ -1,4 +1,4 @@
-package com.menes.db;
+package com.menes.model;
 
 public class CurrencyExchange {
     private String code;

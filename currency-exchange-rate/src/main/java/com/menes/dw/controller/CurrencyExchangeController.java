@@ -1,20 +1,36 @@
 package com.menes.dw.controller;
 
+import com.menes.dw.payload.request.CurrencyExchangeRequest;
 import com.menes.dw.service.CurrencyExchangeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/currency-exchange-rate")
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("api/v1/currency-exchange-rates")
 public class CurrencyExchangeController {
     private final CurrencyExchangeService service;
 
-    @GetMapping
-    public ResponseEntity<?> greeting() {
-        return ResponseEntity.ok("Helle, Have a nice day!");
+    @GetMapping(path = {"/today", "/", ""})
+    public ResponseEntity<?> getAllCurrencyExchangeRate() {
+        return ResponseEntity.ok(
+                service.getAllCurrencyExchangeRateByDate(CurrencyExchangeRequest.of(LocalDate.now()))
+        );
     }
+
+    @GetMapping("/{date}")
+    public ResponseEntity<?> getAllCurrencyExchangeRate(
+            @PathVariable("date")
+            @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
+
+        var request = new CurrencyExchangeRequest();
+        request.setDate(date);
+        return ResponseEntity.ok(service.getAllCurrencyExchangeRateByDate(request));
+    }
+
 }

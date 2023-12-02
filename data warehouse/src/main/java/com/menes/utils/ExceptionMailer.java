@@ -8,18 +8,18 @@ import javax.mail.internet.MimeMultipart;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 public class ExceptionMailer {
-    private static final String FROM_EMAIL = "dduymen@gmail.com"; // replace with your email
-    private static final String TO_EMAIL = "20130072@st.hcmuaf.edu.vn"; // replace with recipient email
-    private static final String PASSWORD = "vraxxjseroufwaru"; // replace with your email password
-
+    public static String TO_EMAIL = "20130072@st.hcmuaf.edu.vn";
+    private static final Configuration CONFIGURATION = Configuration.getInstance();
 
     public static void handleException(Exception e) {
         try {
             // Create an error file and write the exception details to it
-            String errorFileName = Configuration.getInstance().getErrorFileName();
+            String errorFileName = CONFIGURATION.getErrorPath() + "error_log" + DateTimeFormatter.ofPattern("dd-MM-yy_HH-mm-ss").format(LocalDateTime.now()) + ".txt";
             PrintWriter writer = new PrintWriter(new FileWriter(errorFileName));
             e.printStackTrace(writer);
             writer.close();
@@ -45,7 +45,7 @@ public class ExceptionMailer {
         // Create a mail session
         Session session = Session.getInstance(properties, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(FROM_EMAIL, PASSWORD);
+                return new PasswordAuthentication(CONFIGURATION.getServerMailUsername(), CONFIGURATION.getServerMailPassword());
             }
         });
 
@@ -53,7 +53,7 @@ public class ExceptionMailer {
         MimeMessage message = new MimeMessage(session);
 
         // Set the sender and recipient addresses
-        message.setFrom(new InternetAddress(FROM_EMAIL));
+        message.setFrom(new InternetAddress(CONFIGURATION.getServerMailUsername()));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(TO_EMAIL));
 
         // Set the email subject

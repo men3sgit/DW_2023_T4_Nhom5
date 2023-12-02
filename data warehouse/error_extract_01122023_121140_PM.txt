@@ -1,12 +1,12 @@
-org.openqa.selenium.ElementNotInteractableException: element not interactable
-  (Session info: chrome=119.0.6045.160)
+    org.openqa.selenium.ElementNotInteractableException: element not interactable
+  (Session info: chrome=119.0.6045.200)
 Build info: version: '4.8.2', revision: '826dbfc730'
 System info: os.name: 'Windows 10', os.arch: 'amd64', os.version: '10.0', java.version: '19.0.1'
 Driver info: org.openqa.selenium.chrome.ChromeDriver
-Command: [bd4f9c227440264e2a42eee54661897a, sendKeysToElement {id=AA743B12C00E546C4090275B759D7077_element_289, value=[Ljava.lang.CharSequence;@6d4c18b8}]
-Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 119.0.6045.160, chrome: {chromedriverVersion: 119.0.6045.159 (eaa767197fa..., userDataDir: C:\Users\LENOVO\AppData\Loc...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:59539}, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: WINDOWS, proxy: Proxy(), se:cdp: ws://localhost:59539/devtoo..., se:cdpVersion: 119.0.6045.160, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
-Element: [[ChromeDriver: chrome on WINDOWS (bd4f9c227440264e2a42eee54661897a)] -> id: load-more-label]
-Session ID: bd4f9c227440264e2a42eee54661897a
+Command: [ca5ce6695e12c5aacf4fb57a7e1000d0, sendKeysToElement {id=655A4858BC7324EAF60785F547DC9166_element_90, value=[Ljava.lang.CharSequence;@5621a671}]
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 119.0.6045.200, chrome: {chromedriverVersion: 119.0.6045.159 (eaa767197fa..., userDataDir: C:\Users\LENOVO\AppData\Loc...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:58414}, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: WINDOWS, proxy: Proxy(), se:cdp: ws://localhost:58414/devtoo..., se:cdpVersion: 119.0.6045.200, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
+Element: [[ChromeDriver: chrome on WINDOWS (ca5ce6695e12c5aacf4fb57a7e1000d0)] -> id: load-more-label]
+Session ID: ca5ce6695e12c5aacf4fb57a7e1000d0
 	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:67)
 	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
 	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:484)

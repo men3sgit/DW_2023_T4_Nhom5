@@ -1,0 +1,29 @@
+/* CurrencyTable.css */
+
+table {
+    width: 70%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin: auto;
+  }
+  
+  th {
+    background-color: rgb(64, 123, 195);
+    color: white;
+  }
+  
+  /* Add this CSS for border and alternating row styling */
+
+
+  
+  th, td {
+    border: 1px solid #dddddd; /* Border color */
+    padding: 8px; /* Padding inside cells */
+    text-align: center;
+  }
+  
+  /* Style even rows */
+  tr:nth-child(even) {
+    background-color: rgb(226, 234, 244); /* Background color for even rows */
+  }
+  

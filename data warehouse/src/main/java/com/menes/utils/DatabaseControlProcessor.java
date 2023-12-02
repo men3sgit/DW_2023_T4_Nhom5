@@ -34,13 +34,15 @@ import java.util.Properties;
  */
 public class DatabaseControlProcessor {
     private static final String CONFIG_FILE_PATH = "../config.properties";
-    private static final String host;
-    private static final String port;
-    private static final String username;
-    private static final String password;
-    private static final String dbName;
+    private static String host;
+    private static String port;
+    private static String username;
+    private static String password;
+    private static String dbName;
+    private static int source;
 
-    static {
+    public static void run(String fSource) {
+        source = Integer.parseInt(fSource);
         // 1. Load configuration properties and establish a database connection.
         Properties properties = new Properties();
         try (FileInputStream fis = new FileInputStream(CONFIG_FILE_PATH)) {
@@ -64,6 +66,7 @@ public class DatabaseControlProcessor {
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * Processes all configurations in the database.
@@ -96,7 +99,11 @@ public class DatabaseControlProcessor {
 
                 String resultPath = (String) config.get("result_path");
                 // Execute VietcombankScraping process.
-                VietcombankScraping.run(resultPath);
+                if (source == Source.SACOMBANK) {
+                    SacombankScraping.run(resultPath);
+                } else {
+                    VietcombankScraping.run(resultPath);
+                }
 
                 // Update the configuration status to indicate crawling completion.
                 updateConfigStatus(handle, id, Status.OFF, Status.CRAWLED);
@@ -109,6 +116,9 @@ public class DatabaseControlProcessor {
 
                 // Update the configuration status to indicate transformation completion.
                 updateConfigStatus(handle, id, Status.OFF, Status.TRANSFORMED);
+                updateConfigStatus(handle, id, Status.RUNNING, Status.LOADING);
+
+                StagingToDataWarehouse.run();
 
             } catch (Exception e) {
                 // In case of an exception during processing, update the configuration status to indicate an error.

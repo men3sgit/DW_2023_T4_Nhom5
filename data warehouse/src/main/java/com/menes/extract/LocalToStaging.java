@@ -1,13 +1,16 @@
 package com.menes.extract;
 
-import com.menes.db.CurrencyExchange;
+import com.menes.model.CurrencyExchange;
 import com.menes.utils.Configuration;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -16,19 +19,8 @@ import java.util.Comparator;
  */
 public class LocalToStaging {
 
-    /**
-     * Configuration instance.
-     */
-    private static final Configuration CONFIGURATION;
+    private static final Configuration CONFIGURATION = Configuration.getInstance();
 
-    static {
-        try {
-            Thread.sleep(4000);
-            CONFIGURATION = Configuration.getInstance();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * Gets the path to the latest CSV file in the specified directory.
@@ -51,9 +43,9 @@ public class LocalToStaging {
      * Runs the process of reading data from the CSV file and inserting it into the PostgreSQL database.
      */
     public static void run(String extractFilePath) throws IOException {
-        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", CONFIGURATION.getDBHost(), CONFIGURATION.getDBPort(), CONFIGURATION.getDBName());
-        String username = CONFIGURATION.getDBUsername();
-        String password = CONFIGURATION.getDBPassword();
+        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", CONFIGURATION.getDBStagingHost(), CONFIGURATION.getDBStagingName(), CONFIGURATION.getDBStagingPort());
+        String username = CONFIGURATION.getDBStagingUsername();
+        String password = CONFIGURATION.getDBStagingPassword();
 
         Jdbi jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
 
