@@ -11,7 +11,7 @@ public class DimDateGenerator {
 
     public static void main(String[] args) {
         try {
-            generateCsv("d:\\dim_date.csv");
+            generateCsv("dim_date.csv");
         } catch (IOException e) {
             e.printStackTrace();
         }

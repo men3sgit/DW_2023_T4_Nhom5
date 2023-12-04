@@ -14,12 +14,13 @@ import java.util.Properties;
 
 public class ExceptionMailer {
     public static String TO_EMAIL = "20130072@st.hcmuaf.edu.vn";
+    public static String ERROR_PATH = "D:\\";
     private static final Configuration CONFIGURATION = Configuration.getInstance();
 
     public static void handleException(Exception e) {
         try {
             // Create an error file and write the exception details to it
-            String errorFileName = CONFIGURATION.getErrorPath() + "error_log" + DateTimeFormatter.ofPattern("dd-MM-yy_HH-mm-ss").format(LocalDateTime.now()) + ".txt";
+            String errorFileName = ERROR_PATH + "error_log" + DateTimeFormatter.ofPattern("dd-MM-yy_HH-mm-ss").format(LocalDateTime.now()) + ".txt";
             PrintWriter writer = new PrintWriter(new FileWriter(errorFileName));
             e.printStackTrace(writer);
             writer.close();

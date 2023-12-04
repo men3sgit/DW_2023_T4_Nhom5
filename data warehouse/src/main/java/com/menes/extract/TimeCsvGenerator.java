@@ -5,8 +5,7 @@ import java.io.IOException;
 
 public class TimeCsvGenerator {
 
-    private static final String CSV_FILE_PATH = "time_data.csv";
-    private static int count = 1;
+    private static final String CSV_FILE_PATH = "dim_time.csv";
 
     public static void main(String[] args) {
         generateTimeCsv();
