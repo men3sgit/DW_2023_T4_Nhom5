@@ -70,25 +70,41 @@ public class Configuration {
         return Integer.parseInt(getProperty("db.staging.port"));
     }
 
+    public String getDBDataWarehouseName() {
+        return getProperty("db.wh.name");
+    }
+
+    public String getDBDataWarehousePort() {
+        return getProperty("db.wh.port");
+    }
+
+    public String getDBDataWarehouseHost() {
+        return getProperty("db.wh.host");
+    }
+
+    public String getDBDataWarehouseUsername() {
+        return getProperty("db.wh.username");
+    }
+
+    public String getDBDataWarehousePassword() {
+        return getProperty("db.wh.password");
+    }
+
     public String getDBStagingName() {
         return getProperty("db.staging.name");
     }
+
 
     // Environment properties
     public String getChromeDriverPath() {
         return getProperty("env.chromedriver.path");
     }
 
-    public String getExtractPath() {
-        return getProperty("naming.extract.path");
-    }
 
-    public String getErrorPath() {
-        return getProperty("naming.error.path");
-    }
     public String getServerMailUsername() {
         return getProperty("server.mail.username");
     }
+
     public String getServerMailPassword() {
         return getProperty("server.mail.password");
     }

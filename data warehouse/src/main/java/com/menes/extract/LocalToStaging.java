@@ -43,7 +43,7 @@ public class LocalToStaging {
      * Runs the process of reading data from the CSV file and inserting it into the PostgreSQL database.
      */
     public static void run(String extractFilePath) throws IOException {
-        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", CONFIGURATION.getDBStagingHost(), CONFIGURATION.getDBStagingName(), CONFIGURATION.getDBStagingPort());
+        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", CONFIGURATION.getDBStagingHost(), CONFIGURATION.getDBStagingPort(), CONFIGURATION.getDBStagingName());
         String username = CONFIGURATION.getDBStagingUsername();
         String password = CONFIGURATION.getDBStagingPassword();
 
