@@ -14,5 +14,4 @@ import java.time.LocalDate;
 public class CurrencyExchangeRequest {
     @JsonFormat(pattern = Pattern.DATE_FULL_DASH)
     private LocalDate date;
-
 }

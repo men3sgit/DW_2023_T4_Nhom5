@@ -61,9 +61,8 @@ public class VietcombankScraping {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
         // Open CSV file for writing
-        String csvFileName = csvPath;
         char customDelimiter = '\t';
-        try (CSVWriter csvWriter = (CSVWriter) new CSVWriterBuilder(new FileWriter(csvFileName)).withSeparator(customDelimiter).withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER).build()) {
+        try (CSVWriter csvWriter = (CSVWriter) new CSVWriterBuilder(new FileWriter(csvPath)).withSeparator(customDelimiter).withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER).build()) {
             // Write header to CSV file
             csvWriter.writeNext(new String[]{"Code", "Name", "Cash Buying", "Telegraphic Buying", "Selling", "Time", "Date", "Source", "Crawled Date", "Crawled Time"});
             Thread.sleep(3000);
@@ -83,7 +82,7 @@ public class VietcombankScraping {
             String[] dateTimeArray = driver.findElement(By.cssSelector(".annotate__content strong")).getText().split("\\s+");
             String time = dateTimeArray[1] + ":00";
             String date = dateTimeArray[3];
-
+            String timeNow = timeFormatter.format(LocalDateTime.now());
             rows.forEach(row -> {
                 List<String> columns = row.findElements(By.tagName("td")).stream().map(WebElement::getText).toList();
 
@@ -95,10 +94,11 @@ public class VietcombankScraping {
                 String selling = columns.get(4);
                 String bank = "Vietcombank";
                 // Print to console
-                System.out.println(String.format("%s %s %s %s %s %s %s %s %s", code, name, cashBuying, telegraphicBuying, selling, time, bank, date, timeFormatter.format(LocalDateTime.now())));
+                System.out.println(String.format("%s %s %s %s %s %s %s %s %s", code, name, cashBuying, telegraphicBuying, selling, time, bank, date, timeNow));
 
                 // Write to CSV file
-                csvWriter.writeNext(new String[]{code, name, cashBuying, telegraphicBuying, selling, time, date, bank, dateFormatter.format(LocalDateTime.now()), timeFormatter.format(LocalDateTime.now())});
+                csvWriter.writeNext(new String[]{code, name, cashBuying, telegraphicBuying, selling, time, date, bank, dateFormatter.format(LocalDateTime.now()), timeNow});
+
                 count++;
             });
 
@@ -120,10 +120,6 @@ public class VietcombankScraping {
         driver.get("https://www.vietcombank.com.vn/KHCN/Cong-cu-tien-ich/Ty-gia");
         driver.manage().window().maximize();
         return driver;
-    }
-
-    public static void main(String[] args) throws IOException, ParseException, InterruptedException {
-        VietcombankScraping.run("D:\\");
     }
 
 }

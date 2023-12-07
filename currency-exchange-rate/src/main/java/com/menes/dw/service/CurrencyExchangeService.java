@@ -1,6 +1,5 @@
 package com.menes.dw.service;
 
-import com.menes.dw.model.CurrencyExchange;
 import com.menes.dw.payload.request.CurrencyExchangeRequest;
 import com.menes.dw.payload.response.CurrencyExchangeResponse;
 

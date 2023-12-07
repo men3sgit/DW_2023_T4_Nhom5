@@ -39,19 +39,28 @@ public class DatabaseControlProcessor {
 
     private static int source;
 
+    private static final Jdbi jdbi;
+
+    static {
+        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbName);
+        jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
+    }
+
     public static void run(String fSource) {
         source = Integer.parseInt(fSource);
-        // 1. Load configuration properties and establish a database connection.
+        try {
+            Logger.log(source, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", "Processing started");
+            // 1. Load configuration properties and establish a database connection.
+            Logger.log(source, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", "Establishing a database connection");
 
-        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbName);
+            jdbi.useHandle(DatabaseControlProcessor::processConfigs);
 
-        //2. Initialize Jdbi with SQL object plugin for database interaction.
-        Jdbi jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
-
-        //3. Process configurations using a Jdbi handle.
-        jdbi.useHandle(handle -> processConfigs(handle));
-
-        // Propagate any IO exceptions as runtime exceptions.
+        } catch (Exception e) {
+            Logger.log(source, Logger.Level.ERROR, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", e.getMessage());
+            throw new RuntimeException(e);
+        } finally {
+            Logger.log(source, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", "Processing completed");
+        }
     }
 
 
@@ -79,45 +88,56 @@ public class DatabaseControlProcessor {
         String flag = (String) config.get("is_running");
 
         if (Flag.OFF.toString().equals(flag)) {
-            int id = (int) config.get("id");
+            int configId = (int) config.get("id");
             try {
                 // Update the configuration status to indicate crawling.
-                updateConfigStatus(handle, id, Flag.RUNNING, Status.CRAWLING);
+                updateConfigStatus(handle, configId, Flag.RUNNING, Status.CRAWLING);
 
                 String resultPath = (String) config.get("result_path");
+                String errorPath = (String) config.get("error_path");
+                String email = (String) config.get("email");
+                ExceptionMailer.ERROR_PATH = errorPath;
+                ExceptionMailer.TO_EMAIL = email;
+
                 if (source == Source.SACOMBANK) {
+                    Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Processing SACOMBANK configuration");
                     SacombankScraping.run(resultPath);
                 } else {
                     // Execute VietcombankScraping process.
+                    Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Processing Vietcombank configuration");
                     VietcombankScraping.run(resultPath);
                 }
 
                 // Update the configuration status to indicate crawling completion.
-                updateConfigStatus(handle, id, Flag.OFF, Status.CRAWLED);
+                updateConfigStatus(handle, configId, Flag.OFF, Status.CRAWLED);
                 // Update the configuration status to indicate transforming.
-                updateConfigStatus(handle, id, Flag.RUNNING, Status.TRANSFORMING);
+                updateConfigStatus(handle, configId, Flag.RUNNING, Status.TRANSFORMING);
 
                 // Execute LocalToStaging process.
-
+                Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing LocalToStaging process");
                 LocalToStaging.run(resultPath);
 
                 // Update the configuration status to indicate transformation completion.
-                updateConfigStatus(handle, id, Flag.OFF, Status.TRANSFORMED);
-                updateConfigStatus(handle, id, Flag.RUNNING, Status.LOADING);
+                updateConfigStatus(handle, configId, Flag.OFF, Status.TRANSFORMED);
+                updateConfigStatus(handle, configId, Flag.RUNNING, Status.LOADING);
 
+                // Execute StagingToDataWarehouse process.
+                Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing StagingToDataWarehouse process");
                 StagingToDataWarehouse.run();
-                updateConfigStatus(handle, id, Flag.OFF, Status.LOADED);
+                updateConfigStatus(handle, configId, Flag.OFF, Status.LOADED);
+                updateConfigStatus(handle, configId, Flag.RUNNING, Status.LOADING);
 
-                // to data mart
-                updateConfigStatus(handle, id, Flag.OFF, Status.FINISHED);
+                // Execute DataWarehouseToMartLoader process.
+                Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing DataWarehouseToMartLoader process");
+                DataWarehouseToMartLoader.run();
+
+                // Update the configuration status to indicate the process is finished.
+                updateConfigStatus(handle, configId, Flag.OFF, Status.FINISHED);
 
             } catch (Exception e) {
                 // In case of an exception during processing, update the configuration status to indicate an error.
-                handle.createUpdate("UPDATE configs SET status = :status WHERE id = :id")
-                        .bind("status", Status.ERROR.toString())
-                        .bind("is_running", Flag.OFF.toString())
-                        .bind("id", id)
-                        .execute();
+                handle.createUpdate("UPDATE configs SET status = :status WHERE id = :id").bind("status", Status.ERROR.toString()).bind("is_running", Flag.OFF.toString()).bind("id", configId).execute();
+                Logger.log(configId, Logger.Level.ERROR, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", e.getMessage());
                 throw new RuntimeException(e);
             }
         }
@@ -132,10 +152,6 @@ public class DatabaseControlProcessor {
      * @param configStatus    The new value for the 'status' field.
      */
     private static void updateConfigStatus(Handle handle, int id, Flag isRunningStatus, Status configStatus) {
-        handle.createUpdate("UPDATE configs SET is_running = :isRunning, status = :status WHERE id = :id")
-                .bind("isRunning", isRunningStatus.toString())
-                .bind("status", configStatus.toString())
-                .bind("id", id)
-                .execute();
+        handle.createUpdate("UPDATE configs SET is_running = :isRunning, status = :status, updated_at = CURRENT_TIMESTAMP WHERE id = :id").bind("isRunning", isRunningStatus.toString()).bind("status", configStatus.toString()).bind("id", id).execute();
     }
 }
