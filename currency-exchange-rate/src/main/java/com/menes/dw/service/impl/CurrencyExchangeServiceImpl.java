@@ -3,6 +3,7 @@ package com.menes.dw.service.impl;
 import com.menes.dw.payload.request.CurrencyExchangeRequest;
 import com.menes.dw.payload.response.CurrencyExchangeResponse;
 import com.menes.dw.repository.CurrencyExchangeRepository;
+import com.menes.dw.service.CurrencyExchangeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class CurrencyExchangeServiceImpl implements com.menes.dw.service.CurrencyExchangeService {
+public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
     private final CurrencyExchangeRepository repository;
 
     @Override

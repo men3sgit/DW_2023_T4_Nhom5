@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 @Data
 @Entity
 @Table(name = "currency_exchange_rates")
