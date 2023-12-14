@@ -29,13 +29,43 @@ import java.util.Map;
  * @Email menesforenglish102@gmail.com
  * @since 2023-11-28
  */
+
+/**
+ * DatabaseConfiguration class provides access to the configuration settings
+ * for connecting to a database using the DBControl module.
+ */
 public class DatabaseControlProcessor {
+    /**
+     * 1. The singleton instance of the Configuration class used for retrieving
+     * database connection settings.
+     */
     private static final Configuration CONFIGURATION = Configuration.getInstance();
+
+    /**
+     * The host address of the database server.
+     */
     private static final String host = CONFIGURATION.getDBControlHost();
+
+    /**
+     * The port number for connecting to the database server.
+     */
     private final static String port = String.valueOf(CONFIGURATION.getDBControlPort());
+
+    /**
+     * The username used for authenticating the database connection.
+     */
     private final static String username = CONFIGURATION.getDBControlUsername();
+
+    /**
+     * The password used for authenticating the database connection.
+     */
     private final static String password = CONFIGURATION.getDBControlPassword();
+
+    /**
+     * The name of the database to connect to.
+     */
     private final static String dbName = CONFIGURATION.getDBControlName();
+    ;
 
     private static int source;
 
@@ -57,6 +87,7 @@ public class DatabaseControlProcessor {
 
         } catch (Exception e) {
             Logger.log(source, Logger.Level.ERROR, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", e.getMessage());
+            ExceptionMailer.handleException(e);
             throw new RuntimeException(e);
         } finally {
             Logger.log(source, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", "Processing completed");
@@ -74,6 +105,7 @@ public class DatabaseControlProcessor {
         handle.createQuery("SELECT * FROM configs")
                 .mapToMap()
                 .list()
+                .stream().peek(System.out::println)
                 .forEach(config -> processConfig(handle, config));
     }
 
@@ -96,6 +128,7 @@ public class DatabaseControlProcessor {
                 String resultPath = (String) config.get("result_path");
                 String errorPath = (String) config.get("error_path");
                 String email = (String) config.get("email");
+
                 ExceptionMailer.ERROR_PATH = errorPath;
                 ExceptionMailer.TO_EMAIL = email;
 
@@ -110,6 +143,8 @@ public class DatabaseControlProcessor {
 
                 // Update the configuration status to indicate crawling completion.
                 updateConfigStatus(handle, configId, Flag.OFF, Status.CRAWLED);
+                Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing LocalToStaging process");
+
                 // Update the configuration status to indicate transforming.
                 updateConfigStatus(handle, configId, Flag.RUNNING, Status.TRANSFORMING);
 
@@ -133,11 +168,13 @@ public class DatabaseControlProcessor {
 
                 // Update the configuration status to indicate the process is finished.
                 updateConfigStatus(handle, configId, Flag.OFF, Status.FINISHED);
+                Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Finish Extract");
 
             } catch (Exception e) {
                 // In case of an exception during processing, update the configuration status to indicate an error.
                 handle.createUpdate("UPDATE configs SET status = :status WHERE id = :id").bind("status", Status.ERROR.toString()).bind("is_running", Flag.OFF.toString()).bind("id", configId).execute();
                 Logger.log(configId, Logger.Level.ERROR, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", e.getMessage());
+                ExceptionMailer.handleException(e);
                 throw new RuntimeException(e);
             }
         }

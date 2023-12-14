@@ -7,7 +7,7 @@ public class DataWarehouseToMartLoader {
     private static final Configuration CONFIGURATION = Configuration.getInstance();
 
 
-    public static void run() {
+    public static void run() throws Exception{
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", CONFIGURATION.getProperty("db.mart.host"), CONFIGURATION.getProperty("db.mart.port"), CONFIGURATION.getProperty("db.mart.name"));
         String username = CONFIGURATION.getProperty("db.mart.username");
         String password = CONFIGURATION.getProperty("db.mart.password");

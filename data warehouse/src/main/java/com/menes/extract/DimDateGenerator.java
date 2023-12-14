@@ -1,5 +1,7 @@
 package com.menes.extract;
 
+import com.menes.utils.ExceptionMailer;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,6 +15,7 @@ public class DimDateGenerator {
         try {
             generateCsv("dim_date.csv");
         } catch (IOException e) {
+            ExceptionMailer.handleException(e);
             e.printStackTrace();
         }
     }
