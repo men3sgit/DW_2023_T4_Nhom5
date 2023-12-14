@@ -20,13 +20,19 @@ public class ExceptionMailer {
     public static void handleException(Exception e) {
         try {
             // Create an error file and write the exception details to it
-            String errorFileName = ERROR_PATH + "error_log" + DateTimeFormatter.ofPattern("dd-MM-yy_HH-mm-ss").format(LocalDateTime.now()) + ".txt";
+            String errorFileName = ERROR_PATH + "error" + DateTimeFormatter.ofPattern("dd-MM-yy_HH-mm-ss").format(LocalDateTime.now()) + ".txt";
+            String logsFileName = ERROR_PATH + "logs" + DateTimeFormatter.ofPattern("dd-MM-yy_HH-mm-ss").format(LocalDateTime.now()) + ".txt";
             PrintWriter writer = new PrintWriter(new FileWriter(errorFileName));
+            PrintWriter logs = new PrintWriter(new FileWriter(logsFileName));
+            // Write logs file
+            Logger.getAllLogs().forEach(logs::println);
+            // Write error file
             e.printStackTrace(writer);
             writer.close();
 
             // Send the error file via email
-            sendEmailWithAttachment(errorFileName);
+            sendEmailWithAttachment(errorFileName,"Error Report");
+            sendEmailWithAttachment(logsFileName,"Logs File Report");
 
             System.err.println("Error file sent successfully.");
         } catch (Exception ex) {
@@ -35,7 +41,7 @@ public class ExceptionMailer {
         }
     }
 
-    private static void sendEmailWithAttachment(String attachmentFilePath) throws MessagingException, IOException {
+    private static void sendEmailWithAttachment(String attachmentFilePath,String subject) throws MessagingException, IOException {
         // Set up mail properties
         Properties properties = System.getProperties();
         properties.put("mail.smtp.host", "smtp.gmail.com"); // replace with your SMTP server
@@ -58,7 +64,7 @@ public class ExceptionMailer {
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(TO_EMAIL));
 
         // Set the email subject
-        message.setSubject("Error Report");
+        message.setSubject(subject);
 
         // Create the email body text
         BodyPart messageBodyPart = new MimeBodyPart();

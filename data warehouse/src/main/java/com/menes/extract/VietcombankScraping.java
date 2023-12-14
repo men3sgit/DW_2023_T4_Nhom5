@@ -2,6 +2,7 @@ package com.menes.extract;
 
 import com.menes.utils.Configuration;
 import com.menes.utils.ExceptionMailer;
+import com.menes.utils.Logger;
 import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
@@ -34,6 +35,7 @@ public class VietcombankScraping {
     public static void run(String resultPath) throws IOException, ParseException, InterruptedException {
         Configuration configuration = Configuration.getInstance();
         csvPath = resultPath + "extract_data_" + DateTimeFormatter.ofPattern("dd-MM-yy_HH-mm-ss").format(LocalDateTime.now()) + ".csv";
+
         WebDriver driver = initializeDriver();
 
         try {

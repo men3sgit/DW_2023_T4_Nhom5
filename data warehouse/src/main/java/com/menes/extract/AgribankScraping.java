@@ -1,5 +1,6 @@
 package com.menes.extract;
 
+import com.menes.utils.ExceptionMailer;
 import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
@@ -96,6 +97,7 @@ public class AgribankScraping {
             });
 
         } catch (IOException | KeyManagementException e) {
+            ExceptionMailer.handleException(e);
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
