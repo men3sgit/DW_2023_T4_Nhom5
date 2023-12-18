@@ -1,4 +1,4 @@
-package com.menes.extract;
+package com.menes.process;
 
 import com.menes.model.CurrencyExchange;
 import com.menes.utils.Configuration;
@@ -59,14 +59,16 @@ public class LocalToStaging {
         //2: Creating a Jdbi instance and installing the SqlObjectPlugin
         Jdbi jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
 
-        // 3: Reading the CSV file and inserting data into the PostgreSQL database
-        BufferedReader reader = new BufferedReader(new FileReader(getExtractFile(extractFilePath)));
-        // Skip the header row
-        reader.readLine();
+
 
         // 4: Using a Jdbi handle to execute database operations
         jdbi.useHandle(handle -> {
+            // 10 TRUNCATE
             handle.createUpdate("TRUNCATE TABLE currency_exchange").execute();
+            // 3: Reading the CSV file and inserting data into the staging database
+            BufferedReader reader = new BufferedReader(new FileReader(getExtractFile(extractFilePath)));
+            // Skip the header row
+            reader.readLine();
             String line;
             while ((line = reader.readLine()) != null) {
                 // 5: Parse the CSV line

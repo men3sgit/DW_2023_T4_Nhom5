@@ -1,5 +1,6 @@
-package com.menes.utils;
+package com.menes.process;
 
+import com.menes.utils.Configuration;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 

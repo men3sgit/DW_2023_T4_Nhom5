@@ -1,6 +1,6 @@
 package com.menes;
 
-import com.menes.utils.DatabaseControlProcessor;
+import com.menes.process.DatabaseControlProcessor;
 
 public class Main {
     public static void main(String... args) {
