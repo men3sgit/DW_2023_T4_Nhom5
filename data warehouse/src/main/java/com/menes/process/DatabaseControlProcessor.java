@@ -1,11 +1,12 @@
-package com.menes.utils;
+package com.menes.process;
 
-import com.menes.extract.LocalToStaging;
 import com.menes.extract.VietcombankScraping;
+import com.menes.utils.*;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -36,13 +37,14 @@ import java.util.Map;
  */
 public class DatabaseControlProcessor {
     /**
-     * 1. The singleton instance of the Configuration class used for retrieving
+     * 2. The singleton instance of the Configuration class used for retrieving
      * database connection settings.
      */
     private static final Configuration CONFIGURATION = Configuration.getInstance();
 
     /**
      * The host address of the database server.
+     * 3. load dữ liệu vào các thuộc tính
      */
     private static final String host = CONFIGURATION.getDBControlHost();
 
@@ -65,28 +67,27 @@ public class DatabaseControlProcessor {
      * The name of the database to connect to.
      */
     private final static String dbName = CONFIGURATION.getDBControlName();
-    ;
+
 
     private static int source;
 
-    private static final Jdbi jdbi;
-
-    static {
-        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbName);
-        jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
-    }
 
     public static void run(String fSource) {
         source = Integer.parseInt(fSource);
         try {
-            Logger.log(source, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", "Processing started");
-            // 1. Load configuration properties and establish a database connection.
-            Logger.log(source, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", "Establishing a database connection");
-
+            // 4. tạo Jdbc url từ các thuộc tính trước đó
+            //jdbc:postgresql://%s:%s/%s", host, port, dbName
+            String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbName);
+            // 5. tạo Jdbi Instance
+            //Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin())
+            Jdbi jdbi = Jdbi.create(jdbcUrl, username, password).installPlugin(new SqlObjectPlugin());
+            // 8. use handle to create query"SELECT * FROM configs"
             jdbi.useHandle(DatabaseControlProcessor::processConfigs);
 
         } catch (Exception e) {
+            // 6 log
             Logger.log(source, Logger.Level.ERROR, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", e.getMessage());
+            //7 send mail
             ExceptionMailer.handleException(e);
             throw new RuntimeException(e);
         } finally {
@@ -97,16 +98,20 @@ public class DatabaseControlProcessor {
 
     /**
      * Processes all configurations in the database.
+     * 8. use handle to create query"SELECT * FROM configs"
      *
      * @param handle The Jdbi {@code Handle} for database interaction.
      */
     private static void processConfigs(Handle handle) {
-        // Retrieve all configurations from the 'configs' table and process each one.
         handle.createQuery("SELECT * FROM configs")
                 .mapToMap()
                 .list()
                 .stream().peek(System.out::println)
+                // 9. foreach config to run process
                 .forEach(config -> processConfig(handle, config));
+        // 10. log "Processing complete"
+        Logger.log(source, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "run", "Processing completed");
+
     }
 
     /**
@@ -116,55 +121,51 @@ public class DatabaseControlProcessor {
      * @param config The configuration entry to be processed.
      */
     private static void processConfig(Handle handle, Map<String, Object> config) {
-        // Check if the configuration is in the 'OFF' state before processing.
+        // 11. get attributes from each config
+        // 13. set các thuộc tính được lấy từ mỗi config
         String flag = (String) config.get("is_running");
-
+        String resultPath = (String) config.get("result_path");
+        String errorPath = (String) config.get("error_path");
+        String email = (String) config.get("email");
+        int configId = (int) config.get("id");
+        ExceptionMailer.ERROR_PATH = errorPath;
+        ExceptionMailer.TO_EMAIL = email;
+        // Check if the configuration is in the 'OFF' state before processing.
         if (Flag.OFF.toString().equals(flag)) {
-            int configId = (int) config.get("id");
             try {
                 // Update the configuration status to indicate crawling.
+                //14
                 updateConfigStatus(handle, configId, Flag.RUNNING, Status.CRAWLING);
 
-                String resultPath = (String) config.get("result_path");
-                String errorPath = (String) config.get("error_path");
-                String email = (String) config.get("email");
-
-                ExceptionMailer.ERROR_PATH = errorPath;
-                ExceptionMailer.TO_EMAIL = email;
-
-                if (source == Source.SACOMBANK) {
-                    Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Processing SACOMBANK configuration");
-                    SacombankScraping.run(resultPath);
-                } else {
-                    // Execute VietcombankScraping process.
-                    Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Processing Vietcombank configuration");
-                    VietcombankScraping.run(resultPath);
-                }
+                // Execute VietcombankScraping process.
+                Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Processing Vietcombank scraping");
+                // 15. VietcombankScraping.run(resultPath)
+                VietcombankScraping.run(resultPath);
 
                 // Update the configuration status to indicate crawling completion.
                 updateConfigStatus(handle, configId, Flag.OFF, Status.CRAWLED);
                 Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing LocalToStaging process");
 
-                // Update the configuration status to indicate transforming.
-                updateConfigStatus(handle, configId, Flag.RUNNING, Status.TRANSFORMING);
 
                 // Execute LocalToStaging process.
                 Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing LocalToStaging process");
+                // Update the configuration status to indicate transforming.
+                updateConfigStatus(handle, configId, Flag.RUNNING, Status.LOADING);
                 LocalToStaging.run(resultPath);
 
                 // Update the configuration status to indicate transformation completion.
-                updateConfigStatus(handle, configId, Flag.OFF, Status.TRANSFORMED);
-                updateConfigStatus(handle, configId, Flag.RUNNING, Status.LOADING);
+                updateConfigStatus(handle, configId, Flag.OFF, Status.LOADED);
 
                 // Execute StagingToDataWarehouse process.
                 Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing StagingToDataWarehouse process");
+                updateConfigStatus(handle, configId, Flag.RUNNING, Status.TRANSFORMING);
                 StagingToDataWarehouse.run();
-                updateConfigStatus(handle, configId, Flag.OFF, Status.LOADED);
-                updateConfigStatus(handle, configId, Flag.RUNNING, Status.LOADING);
-
+                updateConfigStatus(handle, configId, Flag.OFF, Status.TRANSFORMED);
                 // Execute DataWarehouseToMartLoader process.
                 Logger.log(configId, Logger.Level.INFO, Thread.currentThread().threadId(), DatabaseControlProcessor.class.getName(), "processConfig", "Executing DataWarehouseToMartLoader process");
+                updateConfigStatus(handle, configId, Flag.RUNNING, Status.LOADING);
                 DataWarehouseToMartLoader.run();
+                updateConfigStatus(handle, configId, Flag.OFF, Status.LOADED);
 
                 // Update the configuration status to indicate the process is finished.
                 updateConfigStatus(handle, configId, Flag.OFF, Status.FINISHED);

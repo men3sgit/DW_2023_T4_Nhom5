@@ -1,5 +1,6 @@
-package com.menes.utils;
+package com.menes.process;
 
+import com.menes.utils.Configuration;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
@@ -43,7 +44,7 @@ public class StagingToDataWarehouse {
             handle.createCall("CALL load_data_to_fact();").invoke();
 
         });
-        //// 8: Indicating the success of the data transformation process
+        // 8: Indicating the success of the data transformation process
         System.out.println("TRANSFORM SUCCESSFULLY!");
     }
 }
